@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function signed(){return request.auth != null;}
+  function admin(){return signed() && request.auth.uid == '7q6BobGC1HgGO6g6I4qGHl9aAxw2';}
+  function configured(){return exists(/databases/$(database)/documents/village/config);}
+  function opened(){return get(/databases/$(database)/documents/village/config).data.open == true;}
+  function member(){return signed() && exists(/databases/$(database)/documents/members/$(request.auth.uid));}
+  function mine(){return get(/databases/$(database)/documents/members/$(request.auth.uid)).data.slot;}
+  function slot(s){return s is string && s in ['0','1','2','3','4','5','6'];}
+  match /village/config {
+   allow read: if signed();
+   allow create,update: if admin() && request.resource.data.keys().hasOnly(['names','open','photo']) && request.resource.data.names is list && request.resource.data.names.size()==7 && request.resource.data.open is bool && request.resource.data.photo is string && request.resource.data.photo.size()<900000;
+   allow delete: if false;
+  }
+  match /members/{uid} {
+   allow read: if signed() && request.auth.uid == uid;
+   allow create: if signed() && request.auth.uid == uid && configured() && request.resource.data.keys().hasOnly(['slot']) && slot(request.resource.data.slot);
+   allow update,delete: if false;
+  }
+  match /letters/{id} {
+   allow read: if member() && opened() && resource.data.to == mine();
+   allow create: if member() && configured() && !opened() && request.resource.data.keys().hasOnly(['from','to','body','created']) && request.resource.data.from==mine() && slot(request.resource.data.to) && request.resource.data.to!=mine() && id==mine()+'_'+request.resource.data.to && request.resource.data.body is string && request.resource.data.body.size()>0 && request.resource.data.body.size()<=12000 && request.resource.data.created==request.time && getAfter(/databases/$(database)/documents/receipts/$(id)).data.from==mine() && getAfter(/databases/$(database)/documents/receipts/$(id)).data.to==request.resource.data.to;
+   allow update,delete: if false;
+  }
+  match /receipts/{id} {
+   allow read: if member();
+   allow create: if member() && configured() && !opened() && request.resource.data.keys().hasOnly(['from','to']) && request.resource.data.from==mine() && slot(request.resource.data.to) && request.resource.data.to!=mine() && id==mine()+'_'+request.resource.data.to && getAfter(/databases/$(database)/documents/letters/$(id)).data.from==mine() && getAfter(/databases/$(database)/documents/letters/$(id)).data.to==request.resource.data.to;
+   allow update,delete: if false;
+  }
+ }
+}
