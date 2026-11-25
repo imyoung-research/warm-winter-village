@@ -9,6 +9,11 @@ h1,.house span,.paper h2{font-family:VillageMaru,'Gowun Batang',serif;font-weigh
 header p,.paper p,.paper textarea,#progress{font-family:'Gowun Batang',VillageMaru,serif;font-weight:400}
 body,button,input,select,.status{font-family:Pretendard,'Apple SD Gothic Neo',sans-serif}
 .paper .from{font-family:'Nanum Pen Script','Gowun Batang',serif;font-weight:400}
+</style><style>
+body{word-break:keep-all;overflow-wrap:break-word}
+.paper p,.paper h2,.paper textarea,header h1,header p,#progress{word-break:keep-all;overflow-wrap:break-word}
+.paper p{line-height:1.85}
+.paper textarea{white-space:pre-wrap}
 </style></head><body><main><header><div class="tools"><button id="photo">추억의 액자</button><button id="sound" aria-pressed="false" hidden>♫ BGM 꺼짐</button></div><h1>마음이 머무는 마을</h1><p>우리의 마지막 마음 나눔</p></header><div class="map" id="map"></div><footer><div id="progress">마을을 준비하고 있어요.</div><div class="status" id="status"></div><button id="enter">마을 입장하기</button> <button id="admin" class="secondary">팀장 메뉴</button></footer></main><div class="overlay" id="modal" hidden><section class="paper" role="dialog" aria-modal="true" aria-label="마음 편지" id="paper"></section></div><script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js';
 import {getAuth,signInAnonymously,signInWithEmailAndPassword,signOut,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js';
